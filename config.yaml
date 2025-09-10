@@ -1,0 +1,30 @@
+# PDF Data Extraction Configuration
+
+file_processing:
+  input_folder: "dataset/"
+  output_file: "dataset.json"
+  supported_formats: ["pdf"]
+  ocr_method: "tesseract"
+  test_limit: 1  # Number of files to process for testing (null for all files)
+
+ollama:
+  model: "resolution-extractor"
+  temperature: 0.1 
+  top_k: 1 
+  top_p: 0.1 
+  format: "json"  # Enforce JSON output format
+
+extraction:
+  required_fields:
+    - "numero_resolucion"
+    - "fecha_resolucion"
+    - "ente_emisor"
+    - "descripcion"
+    - "tema"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+
+timezone:
+  name: "America/Argentina/Buenos_Aires"

@@ -1,0 +1,61 @@
+# Modelfile for Municipal Resolution JSON Extractor
+
+FROM nuextract:latest
+
+# Set model parameters for better extraction
+PARAMETER temperature 0.1
+PARAMETER top_k 1
+PARAMETER top_p 0.1
+PARAMETER repeat_penalty 1.1
+PARAMETER stop "RESOLUCIÓN"
+PARAMETER stop "Archivo"
+PARAMETER stop "<|endoftext|>"
+PARAMETER stop "<|end-output|>"
+
+# System message for specialized JSON extraction
+SYSTEM """Eres un experto extractor de datos estructurados en formato JSON a partir de texto plano"""
+
+# Template for user input
+TEMPLATE """
+{{ .System }}
+Extrae información de resoluciones municipales y responde ÚNICAMENTE con JSON válido.
+
+Template de respuesta:
+{
+  "numero_resolucion": [solo números, sin 'RES', por ejemplo: "0000-00"],
+  "fecha_resolucion": [formato dd mmm. yyyy, por ejemplo "05 may. 2024"],
+  "ente_emisor": [área emisora],
+  "tema": [una expresión corta, no más de 10 palabras],
+  "descripcion": [Las acciones que se resuelve llevar a cabo. Consiste en un breve resumen extraído a partir del análisis del articulado de la Resolución (texto que comienza con 'Art.'), en conjunción con la normativa específica que se aplica (por ejemplo Ordenanzas, Decretos u otras Resoluciones municipales). Consiste en una o dos oraciones, y no debe tener más de 400 caracteres en total]
+}
+
+## Requisitos de respuesta:
+Utiliza la codificación utf-8 y el idioma español
+Solo el objeto JSON, sin texto adicional.
+
+{{ .Prompt }}
+"""
+
+# Message examples for few-shot learning
+MESSAGE user """Archivo: test.pdf
+Texto de la resolución:
+RESOLUCIÓN N° 0004-25
+Santa Fe, 20 de agosto de 2024
+VISTO: La Ordenanza N° 11.631 que crea el Programa de Regularización Dominial, y;
+CONSIDERANDO: Que el señor Aguilar Mirian y Ojeda Alejandro han solicitado la rescisión del boleto de compraventa del lote municipal.
+POR ELLO: EL PRESIDENTE DEL ENTE AUTÁRQUICO SANTA FE HABITAT, AGENCIA PARA EL DESARROLLO SOCIAL Y URBANO, RESUELVE:
+ARTÍCULO 1°: Rescindir el boleto de compraventa que adjudicó el lote número 16 de la manzana número 1234 a favor del Sr. CASTELLANO, Orlando, y adjudicar nuevamente el mismo lote a favor del Sr. ALMADA, Juan Carlos.
+ARTÍCULO 2°: Comuníquese, publíquese y archívese."""
+
+MESSAGE assistant """
+{
+  "numero_resolucion": "0004-25",
+  "fecha_resolucion": "20 ago. 2024",
+  "ente_emisor": "Santa Fe Hábitat, Agencia para el Desarrollo Social y Urbano",
+  "tema": "Regularización dominial",
+  "descripcion": "Rescisión de boleto de compraventa y adjudicación de lote municipal."
+}
+"""
+
+# License and metadata
+LICENSE MIT
