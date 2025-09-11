@@ -39,6 +39,7 @@ async def main():
     # stop_event = Event()
     # thread = Thread(target=print_loading_animation, args=(stop_event,))
     # thread.start()
+    
 #############################################################
 ########## Initialize ollama client and prepare for analyze
 #############################################################

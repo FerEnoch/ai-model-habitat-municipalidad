@@ -1,6 +1,0 @@
-{
-    "source_file": "Res 0004-25 Aguilar Mirian y Ojeda Alejandro.pdf",
-    "error": "'LocalOCR' object has no attribute 'extract_with_vl_model'",
-    "processed_at": "2025-08-18T12:37:19.062621-03:00",
-    "processing_time_seconds": null
-}

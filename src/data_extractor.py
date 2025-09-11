@@ -78,7 +78,7 @@ class Data_Extractor:
                 # successAnalisisResult, successTask, analisisErrorResult = {}, False, {}
                 
                 file_name = os.path.basename(file_path)
-                logger.info(f"Extracting text with ocr from: {file_name}")
+                logger.info(f"Extracting text from: {file_name}")
                 
                 try:
                     # Extract text from PDF

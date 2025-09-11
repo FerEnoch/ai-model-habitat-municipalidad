@@ -82,8 +82,11 @@ Thumbs.db
 sample_*
 dataset/
 output/
+dataset.json
 logs/
 *.log
+output.json
+
 
 # API keys and secrets
 .env
