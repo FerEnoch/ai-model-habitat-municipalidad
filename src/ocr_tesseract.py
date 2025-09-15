@@ -9,8 +9,8 @@ import fitz  # PyMuPDF for PDF to image conversion
 import cv2
 import numpy as np
 from PIL import Image
-from utils.index import dump_json
 import pytesseract
+from os import path
 
 
 logger = logging.getLogger(__name__)
@@ -116,9 +116,9 @@ class OCR_tesseract:
         confidence_average = sum(all_confidences) / len(all_confidences) / 100.0
         return round(confidence_average, 2)
 
-    def _format_extraction_result(self, page_texts: list[str], page_count: int, avg_confidence: float) ->  Dict[
-        Literal["method", "text", "page_count", "confidence"],
-        str | int | float
+    def _format_extraction_text_result(self, page_texts: list[str]) ->  Dict[
+        Literal["text"],
+        str
         ]:
         """
         Format the final extraction result.
@@ -138,10 +138,7 @@ class OCR_tesseract:
                 full_text += f"Page {i + 1}:\n{text}\n\n"
         
         return {
-            "method": "tesseract",
             "text": full_text.strip(),
-            "page_count": page_count,
-            "confidence": avg_confidence,
         }
 
     def extract_with_tesseract(self, file_path: str) -> Dict[
@@ -158,10 +155,10 @@ class OCR_tesseract:
             Extracted data dictionary
         """
         try:
-            # Step 1: Convert PDF to images
+            # Convert PDF to images
             images = self._pdf_to_images(file_path)
             
-            # Step 2: Process each image
+            # Process each image
             page_texts = []
             all_confidences = []
             
@@ -175,14 +172,18 @@ class OCR_tesseract:
                 page_texts.append(page_text)
                 all_confidences.extend(confidences)
             
-            # Step 3: Calculate metrics
-            avg_confidence = self._calculate_average_confidence(all_confidences)
+            # Format result
+            text_result = self._format_extraction_text_result(page_texts)
+            confidence = self._calculate_average_confidence(all_confidences)
             
-            # Step 4: Format result
-            result = self._format_extraction_result(page_texts, len(images), avg_confidence)
-            
-            return result
-            
+            return {
+                "method": "tesseract",
+                "file": path.basename(file_path),
+                "page_count": len(images),
+                "text": text_result["text"],
+                "confidence": confidence
+            }
+
         except Exception as e:
             logger.error(f"Tesseract OCR extraction failed: {str(e)}")
             return {"error": str(e), "method": "tesseract"}

@@ -1,6 +1,5 @@
 import logging
-from threading import Thread, Event
-import os
+from os import path
 from typing import Dict, List, Literal
 import ollama
 from ocr_tesseract import OCR_tesseract
@@ -75,7 +74,7 @@ class Data_Extractor:
             for file_path in files_to_process:
                 # successAnalisisResult, successTask, analisisErrorResult = {}, False, {}
                 
-                file_name = os.path.basename(file_path)
+                file_name = path.basename(file_path)
                 logger.info(f"Extracting text from: {file_name}")
                 
                 try:
