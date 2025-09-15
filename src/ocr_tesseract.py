@@ -114,7 +114,7 @@ class OCR_tesseract:
         if not all_confidences:
             return 0.0
         confidence_average = sum(all_confidences) / len(all_confidences) / 100.0
-        return format(confidence_average, "2f")
+        return round(confidence_average, 2)
 
     def _format_extraction_result(self, page_texts: list[str], page_count: int, avg_confidence: float) ->  Dict[
         Literal["method", "text", "page_count", "confidence"],
@@ -180,9 +180,6 @@ class OCR_tesseract:
             
             # Step 4: Format result
             result = self._format_extraction_result(page_texts, len(images), avg_confidence)
-            
-            # Step 5: Save result
-            dump_json(result, "ocr_result.json")
             
             return result
             

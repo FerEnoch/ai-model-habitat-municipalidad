@@ -1,9 +1,7 @@
 import logging
 from threading import Thread, Event
 import os
-from datetime import datetime
 from typing import Dict, List, Literal
-from zoneinfo import ZoneInfo
 import ollama
 from ocr_tesseract import OCR_tesseract
 from utils.config import get_config

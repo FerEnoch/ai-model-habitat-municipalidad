@@ -83,6 +83,7 @@ sample_*
 dataset/
 output/
 dataset.json
+ocr_result.json
 logs/
 *.log
 output.json
