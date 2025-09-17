@@ -5,22 +5,45 @@ file_processing:
   output_file: "dataset.json"
   supported_formats: ["pdf"]
   ocr_method: "tesseract"
-  test_limit: 2  # Number of files to process for testing (null for all files)
+  max_concurrent_tasks: 4  # Number of concurrent OCR tasks (workers)
+  test_limit: 1  # Number of files to process for testing (null for all files)
+
+# fine_tunning:
+#   training_data: "dataset/"
+#   epochs: 3
+#   batch_size: 4
+#   learning_rate: 0.0001
+#   input_prompt_file: "prompts/ft_input_prompt.md"
 
 ollama:
-  model: "resolution-extractor"
-  temperature: 0.1 
-  top_k: 1 
-  top_p: 0.1 
-  format: "json"  # Enforce JSON output format
+  model: "deepseek-v2:16b"
+  temperature: 0.3  # (Creativity vs Consistency) - 0.3-0.5: Good balance for factual summaries
+  top_k: 40        # (Token Selection Pool) - 20-50 for balamce and more diverse token selection
+  top_p: 0.9       # (Cumulative Probability) - 0.7-0.9: Balanced - Better balance of creativity/consistency
+  format: ""       # Plain text for summaries
 
-extraction:
-  required_fields:
-    - "numero_resolucion"
-    - "fecha_resolucion"
-    - "ente_emisor"
-    - "descripcion"
-    - "tema"
+### phi3:latest (LIGHTWEIGHT ALTERNATIVE)
+# ollama:
+#   model: "phi3:latest"
+#   temperature: 0.4
+#   top_k: 50
+#   top_p: 0.9
+#   format: ""
+
+### nuextract:latest (STRUCTURED DATA FOCUS)
+# ollama:
+#   model: "nuextract:latest"
+#   temperature: 0.2
+#   top_k: 20
+#   top_p: 0.8
+#   format: "json"
+# extraction:
+#   required_fields:
+#     - "numero_resolucion"
+#     - "fecha_resolucion"
+#     - "ente_emisor"
+#     - "descripcion"
+#     - "tema"
 
 logging:
   level: "INFO"

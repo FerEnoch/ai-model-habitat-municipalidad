@@ -2,6 +2,7 @@
 OCR implementations for PDF data extraction.
 """
 
+import asyncio
 import io
 import logging
 from typing import Dict, Literal
@@ -11,6 +12,8 @@ import numpy as np
 from PIL import Image
 import pytesseract
 from os import path
+
+from type_def import OCRExtractionResult
 
 
 logger = logging.getLogger(__name__)
@@ -141,10 +144,7 @@ class OCR_tesseract:
             "text": full_text.strip(),
         }
 
-    def extract_with_tesseract(self, file_path: str) -> Dict[
-        Literal["method", "text", "page_count", "confidence"],
-        str | int | float
-        ]:
+    def extract_with_tesseract(self, file_path: str) -> OCRExtractionResult:
         """
         Extract text using Tesseract OCR by converting PDF pages to images.
         
@@ -178,7 +178,7 @@ class OCR_tesseract:
             
             return {
                 "method": "tesseract",
-                "file": path.basename(file_path),
+                "file_name": path.basename(file_path),
                 "page_count": len(images),
                 "text": text_result["text"],
                 "confidence": confidence

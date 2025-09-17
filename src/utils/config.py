@@ -12,6 +12,7 @@ class FileProcessingConfig:
     input_folder: str
     output_file: str
     supported_formats: List[str]
+    max_concurrent_tasks: int
     ocr_method: str
     test_limit: Optional[int]
 
@@ -23,9 +24,9 @@ class OllamaConfig:
     top_p: float
     format: str
 
-@dataclass
-class ExtractionConfig:
-    required_fields: List[str]
+# @dataclass
+# class ExtractionConfig:
+#     required_fields: List[str]
 
 @dataclass
 class LoggingConfig:
@@ -40,7 +41,7 @@ class TimezoneConfig:
 class AppConfig:
     file_processing: FileProcessingConfig
     ollama: OllamaConfig
-    extraction: ExtractionConfig
+    # extraction: ExtractionConfig
     logging: LoggingConfig
     timezone: TimezoneConfig
 
@@ -85,14 +86,14 @@ def load_config(config_path: str = None) -> AppConfig:
         # Create configuration objects
         file_processing = FileProcessingConfig(**config_data['file_processing'])
         ollama = OllamaConfig(**config_data['ollama'])
-        extraction = ExtractionConfig(**config_data['extraction'])
+        # extraction = ExtractionConfig(**config_data['extraction'])
         logging_config = LoggingConfig(**config_data['logging'])
         timezone = TimezoneConfig(**config_data['timezone'])
         
         return AppConfig(
             file_processing=file_processing,
             ollama=ollama,
-            extraction=extraction,
+            # extraction=extraction,
             logging=logging_config,
             timezone=timezone
         )
@@ -136,8 +137,8 @@ def validate_config(config: AppConfig) -> None:
         raise ValueError("Top P must be between 0.0 and 1.0")
     
     # Validate extraction
-    if not config.extraction.required_fields:
-        raise ValueError("Required fields list cannot be empty")
+    # if not config.extraction.required_fields:
+    #     raise ValueError("Required fields list cannot be empty")
     
     print(f"✓ Configuration validated successfully")
     print(f"  - Method: {config.file_processing.ocr_method}")

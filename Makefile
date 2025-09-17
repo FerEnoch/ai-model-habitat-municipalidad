@@ -1,2 +1,7 @@
-start-ocr:
-	python3 src/main.py
+.PHONY: start-model-extr, build-model
+
+start-extract:
+	./.venv/bin/python src/main.py
+
+build-model:
+	./build_model.sh

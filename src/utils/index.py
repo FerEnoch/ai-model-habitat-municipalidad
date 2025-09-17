@@ -9,12 +9,12 @@ from utils.config import get_config
 
 logger = logging.getLogger(__name__)
 
-def get_files_from_folder(folder: str) -> list:
-    '''Recursively scans a folder and returns a list of all PDF files found within it.'''
+def get_files_from_folder(folder: str, file_extention: list[str] = [".pdf"]) -> list:
+    '''Recursively scans a folder and returns a list of files found within the passed extention (defaults to '.pdf').'''
     files = []
     for root, dirs, filenames in os.walk(folder):
         for filename in filenames:
-            if filename.endswith('.pdf'):
+            if any(filename.endswith(ext) for ext in file_extention):
                 files.append(os.path.join(root, filename))
     return files
 

@@ -87,6 +87,7 @@ ocr_result.json
 logs/
 *.log
 output.json
+pyproject.toml
 
 
 # API keys and secrets

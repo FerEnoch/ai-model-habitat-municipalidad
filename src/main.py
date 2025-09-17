@@ -1,45 +1,62 @@
-from ocr_tesseract import OCR_tesseract
-from datetime import datetime
-import ollama
-import os, json, asyncio
-from threading import Thread, Event
+"""
+Main entry point for the PDF Data Extraction application.
+Refactored to follow OOP patterns and Single Responsibility Principle.
+"""
+
+import asyncio
 import logging
-from zoneinfo import ZoneInfo
-from utils.index import dump_json, print_loading_animation
 import sys
 from pathlib import Path
-from data_extractor import Data_Extractor
 
 # Add parent directory to path to import config
 sys.path.append(str(Path(__file__).parent))
 from utils.config import get_config
+from data_processor import DataProcessor
 
 logger = logging.getLogger(__name__)
 
 async def main():
-    # Validate and setup Ollama model
-    data_extractor = Data_Extractor()
-    
-    all_results = []
-    
-    # Configure timezone from config
-    timezone = ZoneInfo(config.timezone.name)
-    
-    # Start timing
-    start_time = datetime.now(timezone)
-    
-    extractionOCRResult = data_extractor.extract_text_from_dataset()
+    """
+    Main application entry point.
+    Orchestrates the data processing workflow using OOP components.
+    """
+    try:
+        # Initialize the data processor (handles all the heavy lifting)
+        processor = DataProcessor()
 
-    print(f"Extracted text from {len(extractionOCRResult)} documents.")
-    
-    dump_json(results=extractionOCRResult)
+        # Process the entire dataset
+        results = await processor.process_dataset()
 
-    #### Thread and time initialization
-    # Create a stop event for the loading animation
-    # stop_event = Event()
-    # thread = Thread(target=print_loading_animation, args=(stop_event,))
-    # thread.start()
-    
+        # Save results
+        processor.save_results(results)
+
+        logger.info("Data processing finished!")
+
+    except Exception as e:
+        logger.error(f"Error in main processing: {e}")
+        raise
+
+if __name__ == "__main__":
+    try:
+        # Load configuration
+        config = get_config()
+
+        # Configure logging
+        logging.basicConfig(
+            level=getattr(logging, config.logging.level),
+            format=config.logging.format
+        )
+
+        # Run the main processing pipeline
+        asyncio.run(main())
+
+    except KeyboardInterrupt:
+        logger.error("Process interrupted by user...")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Fatal error occurred: {e}")
+        sys.exit(1)
+        
 #############################################################
 ########## Initialize ollama client and prepare for analyze
 #############################################################
@@ -162,22 +179,3 @@ async def main():
     #####################
     # Write result to output.json in streaming mode (append as a line-delimited JSON)
     # write_json_file(results=successAnalisisResult if successTask else analisisErrorResult)
-
-if __name__ == "__main__":
-    global config
-    try:
-        # Load configuration first
-        config = get_config()
-        
-        # Configure logging using config
-        logging.basicConfig(
-            level=getattr(logging, config.logging.level),
-            format=config.logging.format
-        )
-        
-        asyncio.run(main())
-        
-    except KeyboardInterrupt:
-        logger.error("Process interrupted by user...")
-    except Exception as e:
-        logger.error(f"Fatal error occurred: {e}")

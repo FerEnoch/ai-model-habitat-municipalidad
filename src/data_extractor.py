@@ -1,10 +1,12 @@
+import asyncio
 import logging
 from os import path
-from typing import Dict, List, Literal
-import ollama
+from typing import Dict, List
+from concurrent.futures import ThreadPoolExecutor
 from ocr_tesseract import OCR_tesseract
 from utils.config import get_config
 from utils.index import print_loading_animation
+from type_def import OCRExtractionResult
 
 logger = logging.getLogger(__name__)
 
@@ -13,54 +15,48 @@ class Data_Extractor:
     Process extracted data to find specific information.
     """
     
-    def __init__(self):
-        """Initialize the data exractor."""
+    def __init__(self, dataset_folder: str = ""):
+        """Initialize the data extractor."""
         # Load configuration
         self.config = get_config()
+        self.dataset_folder = dataset_folder or self.config.file_processing.input_folder
         # Initialize OCR
         self.ocr = OCR_tesseract()
+        self.thread_pool = ThreadPoolExecutor(max_workers=self.config.file_processing.max_concurrent_tasks)
 
-    def _validate_setup_ollama(self) -> None:
-        # Validate and setup Ollama model
-        try:
-            # Test if the configured model is available
-            test_client = ollama.Client()
-            available_models = [model['name'] for model in test_client.list()['models']]
-            
-            if self.config.ollama.model not in available_models:
-                logger.warning(f"Model '{self.config.ollama.model}' not found. Available models: {available_models}")
-                # Fallback to a known model
-                fallback_model = "qwen2.5vl:7b" if "qwen2.5vl:7b" in available_models else available_models[0] if available_models else None
-                if fallback_model:
-                    logger.info(f"Using fallback model: {fallback_model}")
-                    self.config.ollama.model = fallback_model
-                else:
-                    logger.error("No Ollama models available!")
-                    return
+    def _get_processing_files(self, files_detected) -> List[str]:
+            files_to_process = files_detected
+            # Determine how many files to process
+            if self.config.file_processing.test_limit is None:
+                logger.info("Processing all detected files")
             else:
-                logger.info(f"Using model: {self.config.ollama.model}")
-        except Exception as e:
-            logger.warning(f"Could not validate Ollama models: {e}")
+                try :
+                    self.config.file_processing.test_limit = int(self.config.file_processing.test_limit)
+                except ValueError:
+                    logger.warning("test_limit in config is not a valid integer. Processing all files.")
+                    self.config.file_processing.test_limit = None
+                if self.config.file_processing.test_limit < 1:
+                    logger.warning("test_limit in config is less than 1. Processing all files.")
+                    self.config.file_processing.test_limit = None
+            if self.config.file_processing.test_limit is not None:
+                files_to_process = files_detected[:self.config.file_processing.test_limit]
+                logger.info(f"Processing only {self.config.file_processing.test_limit} files for testing")
+            
+            return files_to_process 
 
     def _get_dataset_files_to_analyze(self) -> List[str]:
         # Get list of files to analyze based on config
         from utils.index import get_files_from_folder
         
-        pdf_files = get_files_from_folder(self.config.file_processing.input_folder)
-        logger.info(f"Found {len(pdf_files)} PDF files to process")
+        files_detected = get_files_from_folder(self.dataset_folder, self.config.file_processing.supported_formats)
+        # Log detected files according to file extentions
+        for ext in self.config.file_processing.supported_formats:
+            count = len([f for f in files_detected if f.lower().endswith(f".{ext.lower()}")])
+            logger.info(f"Detected {count} .{ext} files detected")
         
-        # Determine how many files to process
-        files_to_process = pdf_files
-        if self.config.file_processing.test_limit:
-            files_to_process = pdf_files[:self.config.file_processing.test_limit]
-            logger.info(f"Processing only {self.config.file_processing.test_limit} files for testing")
-        
-        return files_to_process
+        return self._get_processing_files(files_detected)
     
-    def extract_text_from_dataset(self) -> List[Dict[
-        Literal["method", "text", "page_count", "confidence"],
-        str | int | float
-        ]]:
+    async def extract_text_from_dataset(self) -> List[OCRExtractionResult]:
         """
         Extract text using tesseract.
 
@@ -79,7 +75,9 @@ class Data_Extractor:
                 
                 try:
                     # Extract text from PDF
-                    extractionOCRResult = self.ocr.extract_with_tesseract(file_path)
+                    loop = asyncio.get_event_loop()
+                    extractionOCRResult = await loop.run_in_executor(self.thread_pool, self.ocr.extract_with_tesseract, file_path)
+                    # extractionOCRResult = self.ocr.extract_with_tesseract(file_path)
                     
                     if not extractionOCRResult.get('text'):
                         logger.warning(f"No text extracted from {file_name}")
