@@ -16,7 +16,7 @@ file_processing:
 #   input_prompt_file: "prompts/ft_input_prompt.md"
 
 ollama:
-  model: "deepseek-v2:16b"
+  model: "resolution-summarizer"
   temperature: 0.3  # (Creativity vs Consistency) - 0.3-0.5: Good balance for factual summaries
   top_k: 40        # (Token Selection Pool) - 20-50 for balamce and more diverse token selection
   top_p: 0.9       # (Cumulative Probability) - 0.7-0.9: Balanced - Better balance of creativity/consistency

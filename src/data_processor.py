@@ -60,7 +60,7 @@ class DataProcessor:
             parsed_data = {
                 "source_file": ocr_result.get('file_name', 'unknown'),
                 "error": None,
-                "summary": summary_plaintext,
+                "summary": summary_plaintext.strip(),
                 "ocr_confidence": ocr_result.get('confidence', 0.0),
             }
             
