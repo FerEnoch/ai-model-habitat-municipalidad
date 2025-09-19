@@ -41,10 +41,6 @@ class DataProcessor:
 
         Returns:
             Complete processing result
-
-        Notes:
-            The summary_json returned from the summarizer is expected to be a JSON string
-            with at least a "summary" key, e.g. '{"summary": "Summary text here."}'.
         """
         file_name = ocr_result.get('file_name', 'unknown')
         text = ocr_result.get('text', '')
@@ -53,7 +49,6 @@ class DataProcessor:
 
         try:
             # Step 1: Generate summary
-            # summary_json is expected to be a JSON string with a "summary" key.
             summary_plaintext = await self.summarizer.generate_summary_async(text)
             # summary_obj = json.loads(summary_json)
 

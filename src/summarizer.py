@@ -53,12 +53,13 @@ class Summarizer:
         Returns:
             Summary text
         """
-        prompt = f"""
-                Tu tarea es extraer información clave de las resoluciones municipales proporcionadas
-                en formato de texto plano, y devolverla en un texto breve que sea un resumen completo
-                y perfecto de lo que se resuelve:
-                ## El texto de la reolución es el siguiente:
-                {text}"""
+        prompt = f"""Haz un resumen de máximo 200 palabras de la siguiente resolución municipal. Incluye número de resolución, fecha, expediente, acción principal, detalles del inmueble, beneficiarios y precios.
+
+Texto de la resolución:
+{text}
+
+Resumen (máximo 200 palabras):"""
+
         try:
             response = await self.client.generate(
                 model=self.model_config.model,
