@@ -89,6 +89,7 @@ logs/
 output.json
 pyproject.toml
 
+project-path.md
 
 # API keys and secrets
 .env
